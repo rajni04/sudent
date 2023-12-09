@@ -1,0 +1,21 @@
+{% extends 'student/base.html' %}
+{% block content %}
+
+{% load rest_framework %}
+
+<html><body>
+
+<h1>Profile Login- </h1>
+
+<form  class="form-horizontal" action="{% url 'loginn'  %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+
+        {% render_form serializer  %}
+        <a class="btn btn-primary"  role="button">Submit</a>
+    </div>
+   <!----- <input type="submit" value="Save">-->
+</form>
+
+</body></html>
+{% endblock content %}

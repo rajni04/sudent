@@ -1,0 +1,18 @@
+{% extends 'student/base.html' %}
+
+{% load rest_framework %}
+
+<html>
+    <body>
+{% block content %}
+
+<h1>Profile - </h1>
+
+<form  class="form-horizontal" action="{% url 'student_update'  %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% render_form serializer  %}
+    <input type="submit" value="Save">
+</form>
+
+</body></html>
+{% endblock content %}

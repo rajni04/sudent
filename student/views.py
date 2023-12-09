@@ -6,7 +6,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from .models import *
-from .serializers import ClassDetailSerializer,UserSerializer,UserUpdateSerializer
+from django.shortcuts import render
+from django.contrib.auth import login
+from django.shortcuts import redirect
+from .serializers import ClassDetailSerializer,UserSerializer,UserUpdateSerializer,LoginSerializer
 
 # Create your views here.
 class ClassDetailAPIView(APIView):
@@ -32,34 +35,27 @@ class ClassDetailAPIView(APIView):
 class StudentDetailAPIView(APIView):
     '''Api to create Student Data'''
     renderer_classes = [TemplateHTMLRenderer]
-    template_name = 'try1.html'
-
+    template_name = 'student/student_detail.html'
+    def get(self, request, format=None):
+        serializer = UserSerializer()
+        return Response({'serializer': serializer})
     def post(self, request):
         try:
             serializer = UserSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(
-                    {
-                    "data":serializer.data,
-                    }
-                )
-                # return Response(
-                #     {"message":"Success",
-                #     "data":serializer.data,
-                #     },status=status.HTTP_201_CREATED,
-                # )
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if not serializer.is_valid():
+                return Response({'serializer': serializer})
+            serializer.save()
+            return redirect('/loginn')
         except Exception as e:
-            print(e)
-        #     return Response(
-        #         {"message":"Something went wrong",
-        #          "error":str(e)},
-        #          status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        #     )
+            return Response(
+                {"message":"Something went wrong",
+                 "error":str(e)},
+                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class StudentUpadateAPIView(APIView):
     '''Api to update student data'''
+
     authentication_classes=[TokenAuthentication]
     permission_classes = [IsAuthenticated]
     def put(self, request, id):
@@ -81,28 +77,51 @@ class StudentUpadateAPIView(APIView):
                  "error":str(e)},
                  status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 class LoginAPIView(APIView):
-    '''Api to login and create token'''
+    '''Api to create Student Data'''
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'login/login.html'
+    def get(self, request, format=None):
+        serializer = LoginSerializer()
+        return Response({'serializer': serializer})
+
     def post(self, request):
-        try:
-            phone_number = request.data.get("phone_number",'')
-            password = request.data.get("password",'')
-            try:
-                if phone_number and password:
-                    user = CustomUser.objects.get(phone_number=phone_number,password=password)
-                    if user.status==2:
-                        token, created = Token.objects.get_or_create(user=user)
-                        return Response({"token": token.key,
-                                    "user":user.id}, status=200)
-                    else:
-                        return Response({"message": "User need to be activated",
-                                    "user":user.id}, status=404)
-            except CustomUser.DoesNotExist:
-                return Response({'error': 'User with this phone does not exist.',
-                                }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response(
-                {"message":"Something went wrong",
-                 "error":str(e)},
-                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = LoginSerializer(data=request.POST)
+        serializer.is_valid()
+        user = serializer.validated_data["user"]
+        print("sssssss",user)
+        login(request, user)
+        token, created = Token.objects.get_or_create(user=user)
+        #return redirect('/home')
+        return Response({"serializer":serializer,"status": status.HTTP_200_OK, "user":user.id,"Token": token.key})
+
+
+    # def post(self, request):
+    #     try:
+    #         phone_number = request.data.get("phone_number",'')
+    #         password = request.data.get("password",'')
+    #         try:
+    #             if phone_number and password:
+    #                 user = CustomUser.objects.get(phone_number=phone_number,password=password)
+    #                 if user.status==2:
+    #                     token, created = Token.objects.get_or_create(user=user)
+    #                     return Response({"token": token.key,
+    #                                 "user":user.id}, status=200)
+    #                 else:
+    #                     return Response({"message": "User need to be activated",
+    #                                 "user":user.id}, status=404)
+    #         except CustomUser.DoesNotExist:
+    #             return Response({'error': 'User with this phone does not exist.',
+    #                             }, status=status.HTTP_404_NOT_FOUND)
+    #     except Exception as e:
+    #         return Response(
+    #             {"message":"Something went wrong",
+    #              "error":str(e)},
+    #              status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )
+def home(request):
+
+    # render function takes argument  - request
+    # and return HTML as response
+    return render(request, "student/home.html")
