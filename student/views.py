@@ -108,11 +108,6 @@ class LoginAPIView(APIView):
            return Response({"message": "User need to be activated",
                                      "user":user.id}, status=404)
 
-
-
-
-
-
 def logout_view(request):
     logout(request)
     return redirect('/loginn')

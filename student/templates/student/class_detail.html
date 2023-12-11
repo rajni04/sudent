@@ -1,0 +1,18 @@
+{% extends 'student/base.html' %}
+{% load rest_framework %}
+{% block title %} Class {% endblock title %}
+<html>
+    <body>
+{% block content %}
+<form  class="form-horizontal"  method="POST" >
+    {% csrf_token %}
+    <div class="container">
+
+    {% render_form serializer  %}
+        <a class="btn btn-primary" role="button">Submit</a>
+    </div>
+</form>
+{% endblock content %}
+</body>
+</html>
+
