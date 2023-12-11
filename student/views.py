@@ -89,8 +89,8 @@ class StudentUpadateAPIView(APIView):
 
 class LoginAPIView(APIView):
     '''Api to create Student Data'''
-    # renderer_classes = [TemplateHTMLRenderer]
-    # template_name = 'login/login.html'
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'login/login.html'
     def get(self, request, format=None):
         serializer = LoginSerializer()
         return Response({'serializer': serializer})
@@ -107,10 +107,12 @@ class LoginAPIView(APIView):
         else:
            return Response({"message": "User need to be activated",
                                      "user":user.id}, status=404)
-
 def logout_view(request):
     logout(request)
     return redirect('/loginn')
+
+def home(request):
+    return render(request, "login/home.html")
     # def post(self, request):
     #     try:
     #         phone_number = request.data.get("phone_number",'')

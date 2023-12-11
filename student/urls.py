@@ -9,6 +9,8 @@ urlpatterns = [
     path('student_update/<int:id>/', views.StudentUpadateAPIView.as_view(), name='student_update'),
     path('loginn/', views.LoginAPIView.as_view(),name='loginn'),
     path("logout_view/",views.logout_view, name="logout_view"),
+    path("",views.home, name="home"),
+
 
 
      ]
