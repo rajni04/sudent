@@ -6,9 +6,11 @@
 {% block content %}
 <form  class="form-horizontal" action="{% url 'student'  %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
+    <h2 >Register</h2>
+
     <div class="container">
-    {% render_form serializer  %}
-    <a class="btn btn-primary" role="button">Submit</a>
+        {% render_form serializer  %}
+        <a class="btn btn-primary" role="button">Submit</a>
     </div>
 </form>
 {% endblock content %}

@@ -4,16 +4,25 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from .models import *
 from django.shortcuts import render
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect
+from .permission import *
 from .serializers import ClassDetailSerializer,UserSerializer,UserUpdateSerializer,LoginSerializer
 
 # Create your views here.
 class ClassDetailAPIView(APIView):
     '''Api to create Class data'''
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'student/class_detail.html'
+    permission_classes=(IsAdmin,)
+    authentication_classes=(TokenAuthentication,)
+
+    def get(self, request, format=None):
+        serializer = ClassDetailSerializer()
+        return Response({'serializer': serializer})
     def post(self, request):
         try:
             serializer = ClassDetailSerializer(data=request.data)
@@ -80,8 +89,8 @@ class StudentUpadateAPIView(APIView):
 
 class LoginAPIView(APIView):
     '''Api to create Student Data'''
-    renderer_classes = [TemplateHTMLRenderer]
-    template_name = 'login/login.html'
+    # renderer_classes = [TemplateHTMLRenderer]
+    # template_name = 'login/login.html'
     def get(self, request, format=None):
         serializer = LoginSerializer()
         return Response({'serializer': serializer})
@@ -89,14 +98,24 @@ class LoginAPIView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.POST)
         serializer.is_valid()
-        user = serializer.validated_data["user"]
-        print("sssssss",user)
-        login(request, user)
-        token, created = Token.objects.get_or_create(user=user)
-        #return redirect('/home')
-        return Response({"serializer":serializer,"status": status.HTTP_200_OK, "user":user.id,"Token": token.key})
+        user = serializer.validated_data
+        print("sssssss---------",user)
+        if user.status==2:
+            login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"status": status.HTTP_200_OK,"user":user.id, "Token": token.key})
+        else:
+           return Response({"message": "User need to be activated",
+                                     "user":user.id}, status=404)
 
 
+
+
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('/loginn')
     # def post(self, request):
     #     try:
     #         phone_number = request.data.get("phone_number",'')
@@ -120,8 +139,3 @@ class LoginAPIView(APIView):
     #              "error":str(e)},
     #              status=status.HTTP_500_INTERNAL_SERVER_ERROR
     #         )
-def home(request):
-
-    # render function takes argument  - request
-    # and return HTML as response
-    return render(request, "student/home.html")

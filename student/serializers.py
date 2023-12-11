@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework import exceptions
 from rest_framework.response import Response
 from drf_extra_fields.fields import Base64ImageField
-from django.contrib.auth import authenticate
 from .models import ClassDetail,CustomUser
 
 class ClassDetailSerializer(serializers.ModelSerializer):
@@ -11,10 +10,6 @@ class ClassDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
-    # profile_image = Base64ImageField(
-    #     max_length=None, use_url=True,
-    # )
-
     stclass=ClassDetailSerializer(read_only=True)
     class Meta:
         model = CustomUser
@@ -44,14 +39,16 @@ class LoginSerializer(serializers.ModelSerializer):
         phone_number = data.get("phone_number",None)
         print("phon",phone_number)
         password = data.get("password",None)
+
         if phone_number and password:
             user= CustomUser.objects.get(phone_number=phone_number,password=password)
             print("user-fff-",user.status)
-            if user.status==2:
-                data['user'] = user
-                return data
-            else:
-                return Response({"message": "User need to be activated"},status=404)
+            #if user.status==2:
+                #data['user'] = user
+                #print("data",data["user"])
+            return user
+            #else:
+                #return Response({"message": "User need to be activated"},status=404)
 
 
 
